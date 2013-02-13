@@ -27,3 +27,9 @@ obj/
 [Rr]elease*/
 _ReSharper*/
 [Tt]est[Rr]esult*
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.pdf
+*.gz
