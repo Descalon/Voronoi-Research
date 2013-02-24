@@ -22,7 +22,7 @@ This paper frames the process of generating an organic game world with the use o
 \end{abstract}
 
 \section{Introduction}
-When discussing procedural game-content generation, research usually focusses on the generation of missions and levels and such. This in itself is not a real shocker, designing missions and/or levels are one of the most time consuming tasks that game developers face. Many games that use a form of content generation use templates (e.g. Blizzard's \emph{Diablo} series) or, ambiguously named, "Dungeon Generation" as done by \emph{Rogue}. These methods create rather static and monotonous levels as the former could be recognized by keen-minded players, and the latter generating only sterile rectangular shapes that can be seen as rather dull. Another method for content generation is the use of Voronoi diagrams in level and mission generation. This method is a known technique\cite{patel} for the creation of organic game worlds (done by \emph{Realm of the Mad God}), but has its flaws, especially when the details are observed. In this paper I discuss an improved technique using multiple Voronoi diagrams nested in one and other, making it easier to specify details and creating even more organic game worlds.
+When discussing procedural game-content generation, research usually focusses on the generation of missions and levels and such. This in itself is not a real shocker, designing missions and/or levels are one of the most time consuming tasks that game developers face. Many games that use a form of content generation use templates (e.g. Blizzard's \emph{Diablo} series) or, ambiguously named, "Dungeon Generation" as done by \emph{Rogue}. These methods create rather static and monotonous levels as the former could be recognized by keen-minded players, and the latter generating only sterile rectangular shapes that can be seen as rather dull. Another method for content generation is the use of Voronoi diagrams. This method is a known technique\cite{patel} for the creation of organic game worlds (done by \emph{Realm of the Mad God}), but has its flaws, especially when the details are observed. In this paper I discuss an improved technique using multiple Voronoi diagrams nested in one and other, making it easier to specify details and creating even more organic game worlds.
 
 \section{Previous and Related Work}
 As mentioned in the previous section, Amit Patel did a paper on creating game worlds with use of polygons\cite{patel}. These polygons are generated using a Voronoi diagram and Delaunay triangulation represented as a graph. He created a graph system that links all Voronoi and Delaunay properties to each other. For more on this system see section~\ref{sec:connectinggraphs}. To generate the Voronoi diagram I used an algorithm created by Steven Fortune\cite{fortuneacm}\cite{fortunewiki} and converted to C++ by Shane O'Sullivan\cite{sullivancpp}. This algorithm uses a 'sweep line', or a straight line (either horizontal or vertical) to determine what points belong to which seed point. See figure~\ref{fig:fortune} for an example of this sweep line and I recommend you read \cite{fortunewiki} for a more detailed explanation on how it works. 
@@ -33,14 +33,14 @@ As mentioned in the previous section, Amit Patel did a paper on creating game wo
 \end{figure}
 \section{Graph structures}
 \subsection{Voronoi Diagrams}
-Voronoi diagrams are a way to partition space. Given a "random" sample of points an algorithm will create cells containing all points that are closer to the cell's seed point than all other seed points. 
+Voronoi diagrams, or tessellation are a way to partition space. Given a "random" sample of points an algorithm will create cells containing all points that are closer to the cell's seed point than all other seed points. 
 \begin{figure}[h!]
 	\centering
 		\includegraphics[scale=.2]{images/voronoi-unrelaxed}
-		\caption{Voronoi diagram with 15 nodes.}
+		\caption{Voronoi diagram with 15 seed points / nodes.}
 	\label{fig:pccs:voronoi}
 \end{figure}
-In figure~\ref{fig:pccs:voronoi} you see an example of a Voronoi diagram. The small dots in the cells are the sample points from which the cells were defined. With the irregular shapes that this gives us, we need to do some other steps before we get a workable partitioning. There are a few ways to 'unify' the shapes generated, we opted for Lloyd' algorithm, also known as Voronoi iteration or - relaxation. This algorithm calculates the centres of all the cells and uses these as new sample points for a new diagram. In figure~\ref{fig:lloydal} there is a visualization of this process.
+In figure~\ref{fig:pccs:voronoi} you see an example of a Voronoi diagram. The green dots in the cells are the sample points from which the cells were defined. With the irregular shapes that this gives us, we need to do some other steps before we get a workable partitioning. There are a few ways to 'unify' the shapes generated, we opted for Lloyd' algorithm, also known as Voronoi iteration or - relaxation. This algorithm calculates the centres of all the cells and uses these as new sample points for a new diagram. In figure~\ref{fig:lloydal} there is a visualization of this process.
 
 \begin{figure}[h!]
 \centering
@@ -74,7 +74,7 @@ In figure~\ref{fig:pccs:voronoi} you see an example of a Voronoi diagram. The sm
 \caption{Lloyd's algorithm \cite{lloydwiki}} \label{fig:lloydal}
 \end{figure}
 \subsection{Delaunay Triangulation}
-The relation to the different Voronoi cells can be visually represented using a Delaunay triangulation. This results in an undirected graph which specifies neighbouring cells. In spatial partitioning this is of particular note, for with this information we can start to direct a path from one cell to another at any point in the entire game world. Thus, for example, being able to make certain cells inaccessible from specified directions, or make path-finding easier. Figure~\ref{fig:voronoidelaunay} shows a Voronoi tessellation with the relation of cells represented in a Delaunay triangulation. 
+The relation from cell to cell can be visually represented using a Delaunay triangulation. This results in an undirected graph which specifies neighbouring cells. In spatial partitioning this is of particular note, for with this information we can start to direct a path from one cell to another at any point in the entire game world. Thus, for example, being able to make certain cells inaccessible from specified directions, or make path-finding easier. Figure~\ref{fig:voronoidelaunay} shows a Voronoi tessellation with the relation of cells represented in a Delaunay triangulation. 
 \begin{figure}[b]{}
 \centering
 	\includegraphics[scale=0.25]{images/Delaunay_Voronoi}
@@ -128,7 +128,7 @@ In figure~\ref{fig:pccs:voronoiwchild} you see the outer cells in red and the in
 	\end{subfigure}
 	\caption{ }\label{fig:children}
 \end{figure}
-In figure~\ref{fig:pccs:voronoiwchildborders} and \ref{fig:pccs:voronoiNested} you can see the results of the assignment. The blue cells indicate that they are on the border of their respective parent cell, 
+In figure~\ref{fig:pccs:voronoiwchildborders} and \ref{fig:pccs:voronoiNested} you can see the results of the assignment. The blue cells indicate that they are on the border of their respective parent cell. 
 \section{Finding possible paths}
 In our game we wanted different players to start in their own mission spaces and gradually team up after overcoming a challenge in a mission space. For this I decided on a binary structure as shown in figure~\ref{fig:bintree}. All nodes in this tree represent a mission space, where the leaf nodes represent the player's starting mission space. For this example I used eight players that team up after every mission. Thus player 1 teams up with 2 (team A) and 3 with 4 (team B) after that team A and B get together for the third node. 
 \begin{figure}[h]
